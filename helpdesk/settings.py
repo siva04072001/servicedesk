@@ -118,7 +118,7 @@ CHANNEL_LAYERS ={
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1',6379)], 
+            "hosts": [os.environ.get('REDIS_URL','redis://localhost:6379')], 
         },
     },
 }
@@ -153,7 +153,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "svshelpdesk2001@gmail.com"
 EMAIL_HOST_PASSWORD = "mwhrruqdvllqxskj"
 
-CELERY_BROKER_URL='redis://127.0.0.1:6379'
+#CELERY_BROKER_URL='redis://127.0.0.1:6379'
+CELERY_BROKER_URL=os.environ['REDIS_URL']
 CELERY_ACCEPT_CONTENT=['application/json']
 CELERY_RESULT_SERIALIZER='json'
 CELERY_TASK_SERIALIZER='json'

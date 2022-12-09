@@ -1,0 +1,2 @@
+celery -A helpdesk worker --pool==solo -l info
+celery -A helpdesk beat -l info
