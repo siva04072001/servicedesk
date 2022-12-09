@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'tickets.apps.TicketsConfig',
     'django_celery_results',
     'django_celery_beat',
+    'channels',
 ]
 
 
@@ -80,6 +81,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'helpdesk.wsgi.application'
+ASGI_APPLICATION = 'helpdesk.asgi.application'
 
 
 # Database
@@ -111,6 +113,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CHANNEL_LAYERS ={
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1',6379)], 
+        },
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
