@@ -25,7 +25,7 @@ class User(AbstractUser):
     is_employee=models.BooleanField('is employee', default=False)
 
 class Tickets(models.Model):
-    Id=models.IntegerField(primary_key=True)
+    Id=models.AutoField(primary_key=True)
     username=models.CharField(max_length=100, blank=True, null=True)
     category=models.CharField(max_length=100, blank=True, null=True)
     location=models.CharField(max_length=100, blank=True, null=True) 
@@ -35,8 +35,6 @@ class Tickets(models.Model):
     Description=models.TextField(max_length=1000, blank=True, null=True)
     mobileNo=models.CharField(max_length=13, blank=True, null=True)
     mail=models.CharField(max_length=1000, blank=True, null=True)
-    engmobileNo=models.CharField(max_length=13, blank=True, null=True)
-    engmail=models.CharField(max_length=1000, blank=True, null=True)
     priority=models.CharField(max_length=50, blank=True, null=True)
     status=models.CharField(max_length=50,blank=True, null=True)
     assigned=models.CharField(max_length=100,blank=True, null=True)
@@ -52,4 +50,4 @@ class Tickets(models.Model):
     expired=models.BooleanField(default=False)
 
     def __str__(self):
-        return self.username
+        return self.queries

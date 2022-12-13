@@ -17,11 +17,12 @@ from django.core.files.storage import FileSystemStorage
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.template.loader import render_to_string
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from helpdesk import settings
 from django.contrib.auth import get_user_model
 from celery import shared_task
+
 # Create your views here.
 
 #home page
@@ -578,7 +579,27 @@ def update_ticket(request,Id):
     item.admindesc=request.POST['admindesc']
     item.assigned=request.POST['assigned']
     item.status="assigned"
+    item.expired=False
+    
     item.save()
+    
+    assigned=item.assigned
+    name=item.username
+    queries=item.queries
+    location=item.location
+    due_date=item.due_date
+    mydict = {'Id':Id, 'username': name, 'assigned': assigned, 'queries':queries,'location':location, 'due_date':due_date}
+    users= get_user_model().objects.filter(Q(username=assigned) | Q(username=name))
+    for user in users:
+        to_email=user.email
+        html_template = 'assigned.html'
+        html_message = render_to_string(html_template, context=mydict)
+        subject = 'Ticket is Assigned...'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [to_email]
+        message = EmailMessage(subject, html_message,email_from, recipient_list)
+        message.content_subtype = 'html'
+        message.send()
     context={
         'item':item,
         'eng':eng
@@ -668,7 +689,8 @@ def userticket(request):
             uploadFile=request.FILES['file']
             status="Unassigned"
             assigned="Unassigned"
-            assigned_date=datetime.date.today()
+            assigned_date=date.today()
+            
             if item == 'others':
                 activateitem='True'
                 item=request.POST['itemothers']
@@ -787,3 +809,27 @@ def expiry_mail(self):
             message.content_subtype = 'html'
             message.send()  
             
+
+#send Expiry mail to admin celery
+@shared_task(bind=True)
+def expiry_admin(self):
+    prev_day=datetime.now().date()
+    ticket=Tickets.objects.filter(~Q(status='closed'),~Q(status='Completed'), expired=True, due_date=prev_day)
+
+    for tic in ticket:
+        Id=tic.Id
+        queries=tic.queries
+        assigned_date=tic.assigned_date
+        username=tic.username
+        assigned=tic.assigned
+        status=tic.status
+        to_email="svshelpdesk2001@gmail.com"
+        mydict = {'Id':Id,'assigned':assigned, 'username': username, 'status':status, 'assigned_date': assigned_date, 'queries':queries}
+        html_template = 'adminexpired.html'
+        html_message = render_to_string(html_template, context=mydict)
+        subject = 'List of Expired Tickets Today'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [to_email]
+        message = EmailMessage(subject, html_message,email_from, recipient_list)
+        message.content_subtype = 'html'
+        message.send()   

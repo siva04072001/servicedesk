@@ -12,6 +12,10 @@ app.conf.enable_utc=False
 app.conf.update(timezone = 'Asia/Kolkata')
 
 app.config_from_object(settings, namespace='CELERY')
+celery=Celery(__name__)
+celery.conf.broker_url="redis://redis:6379/0"
+celery.conf.result_backend="redis://redis:6379/0"
+
 
 #celery beat settings
 app.autodiscover_tasks()
@@ -29,5 +33,4 @@ app.conf.beat_schedule ={
         'task': 'tickets.views.expiry_mail',
         'schedule': crontab(hour=9, minute=0)
     },
-    
 }
